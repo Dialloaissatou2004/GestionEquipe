@@ -1,14 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const taskCtrl = require('../controllers/control.tache');
+const taskController = require('../controllers/control.tache');
 const auth = require('../muddlewares/admin');
-const validate = require('../muddlewares/validate');
-const taskSchema = require('../validators/tache');
+const adminOnly = require('../muddlewares/adminOnly');
 
-router.get('/', taskCtrl.lister);
-router.get('/:id', taskCtrl.detail);
-router.post('/', auth, validate(taskSchema), taskCtrl.creer);
-router.put('/:id', auth, validate(taskSchema), taskCtrl.modifier);
-router.delete('/:id', auth, taskCtrl.supprimer);
+// Routes protégées par authentification
+router.get('/', auth, taskController.lister);
+router.get('/:id', auth, taskController.detail);
+router.put('/:id', auth, taskController.modifier);
+
+// Routes pour commentaires et historique
+router.post('/:id/commentaires', auth, taskController.ajouterCommentaire);
+router.get('/:id/historique', auth, taskController.obtenirHistorique);
+
+// Routes réservées aux admins
+router.post('/', auth, adminOnly, taskController.creer);
+router.delete('/:id', auth, adminOnly, taskController.supprimer);
 
 module.exports = router;

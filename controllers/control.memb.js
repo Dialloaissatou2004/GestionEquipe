@@ -2,8 +2,15 @@ const Member= require('../models/model.memb')
 
 exports.creer = async (req, res) => {
   try {
-    console.log('req.body', req.body);
-    console.log('req.file', req.file);
+    // Vérifier si l'email existe déjà
+    const existingMember = await Member.findOne({ email: req.body.email });
+    if (existingMember) {
+      return res.status(409).json({ 
+        status: 409,
+        message: 'Un membre avec cet email existe déjà'
+      });
+    }
+
     const photo = req.file ? '/uploads/' + req.file.filename : null;
     const { nom, poste, email } = req.body;
     const member = new Member({ nom, poste, email, photo });
@@ -18,19 +25,37 @@ exports.creer = async (req, res) => {
 exports.lister = async (req, res) => {
   try {
     const members = await Member.find();
-    res.json(members);
+    res.json({
+      status: 200,
+      message: 'Liste des membres récupérée',
+      data: members
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur' });
+    console.error('Erreur liste des membres:', err);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Erreur serveur',
+      error: err.message 
+    });
   }
 };
 
 exports.detail = async (req, res) => {
   try {
     const m = await Member.findById(req.params.id);
-    if (!m) return res.status(404).json({ error: 'Introuvable' });
-    res.json(m);
+    if (!m) return res.status(404).json({ message: 'Membre introuvable', status: 404 });
+    res.json({ 
+      status: 200,
+      message: 'Membre trouvé',
+      data: m
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur' });
+    console.error('Erreur détail membre:', err);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Erreur serveur',
+      error: err.message 
+    });
   }
 };
 
