@@ -118,8 +118,22 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-// Servir les fichiers statiques avec CORS déjà configuré
+// Servir les fichiers statiques des uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Servir les fichiers statiques du frontend en production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'task-manager/dist')));
+  
+  // Catch-all handler pour les routes frontend (SPA)
+  app.get('*', (req, res) => {
+    // Ne pas intercepter les routes API
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'Route API non trouvée' });
+    }
+    res.sendFile(path.join(__dirname, 'task-manager/dist/index.html'));
+  });
+}
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -143,15 +157,6 @@ app.use("/api/*", (req, res) => {
     path: req.originalUrl,
   });
 });
-
-// Serve static files from React build (for production)
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "task-manager/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "task-manager/dist/index.html"));
-  });
-}
 
 // Global error handler
 app.use((err, req, res, next) => {

@@ -1,0 +1,29 @@
+services:
+  # Backend API Service
+  - type: web
+    name: gestionequipe-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false # Set this in Render dashboard
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/auth/users
+
+  # Frontend Static Site
+  - type: static
+    name: gestionequipe-frontend
+    env: static
+    plan: free
+    buildCommand: cd task-manager && npm install && npm run build
+    staticPublishPath: task-manager/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gestionequipe-2.onrender.com/api

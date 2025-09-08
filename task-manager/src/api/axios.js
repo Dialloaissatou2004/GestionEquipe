@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+// Configuration de l'URL de base selon l'environnement
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gestionequipe-2.onrender.com/api';
 
 // Création d'une instance Axios personnalisée
 const api = axios.create({
